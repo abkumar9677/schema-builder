@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { prisma } from "../config/prisma.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -57,57 +58,59 @@ router.post("/generate", async (req, res) => {
       rdbmsType: parsed.data.rdbmsType
     });
 
-    const createdProject = await prisma.$transaction(async (tx) => {
-      const project = await tx.project.create({
+    const projectId = randomUUID();
+    const tableMap = new Map<string, string>();
+    const tableDesigns = design.tables.slice(0, 20).map((tableDesign) => {
+      const tableId = randomUUID();
+      tableMap.set(tableDesign.name, tableId);
+      return {
+        tableDesign,
+        tableId
+      };
+    });
+    const tables = tableDesigns.map(({ tableDesign, tableId }) => ({
+      id: tableId,
+      projectId,
+      name: tableDesign.name,
+      description: tableDesign.description
+    }));
+    const schemaVersions = tableDesigns.map(({ tableDesign, tableId }) => ({
+      tableId,
+      version: 1,
+      columnsJson: tableDesign.columns,
+      indexesJson: tableDesign.indexes ?? []
+    }));
+    const references = (design.references ?? []).flatMap((reference) => {
+      const fromTableId = tableMap.get(reference.fromTable);
+      const toTableId = tableMap.get(reference.toTable);
+      if (!fromTableId || !toTableId) return [];
+      return {
+        projectId,
+        fromTableId,
+        fromCol: reference.fromColumn,
+        toTableId,
+        toCol: reference.toColumn,
+        accepted: true
+      };
+    });
+
+    await prisma.$transaction([
+      prisma.project.create({
         data: {
+          id: projectId,
           userId: req.user!.sub,
           name: parsed.data.name,
           description: parsed.data.description,
           rdbmsType: parsed.data.rdbmsType
         }
-      });
-
-      const tableMap = new Map<string, string>();
-      for (const tableDesign of design.tables.slice(0, 20)) {
-        const table = await tx.projectTable.create({
-          data: {
-            projectId: project.id,
-            name: tableDesign.name,
-            description: tableDesign.description
-          }
-        });
-        tableMap.set(tableDesign.name, table.id);
-        await tx.schemaVersion.create({
-          data: {
-            tableId: table.id,
-            version: 1,
-            columnsJson: tableDesign.columns,
-            indexesJson: tableDesign.indexes ?? []
-          }
-        });
-      }
-
-      for (const reference of design.references ?? []) {
-        const fromTableId = tableMap.get(reference.fromTable);
-        const toTableId = tableMap.get(reference.toTable);
-        if (!fromTableId || !toTableId) continue;
-        await tx.tableReference.create({
-          data: {
-            projectId: project.id,
-            fromTableId,
-            fromCol: reference.fromColumn,
-            toTableId,
-            toCol: reference.toColumn,
-            accepted: true
-          }
-        });
-      }
-
-      return project;
-    });
+      }),
+      prisma.projectTable.createMany({ data: tables }),
+      prisma.schemaVersion.createMany({ data: schemaVersions }),
+      ...(references.length > 0 ? [prisma.tableReference.createMany({ data: references })] : [])
+    ]);
 
     const created = await prisma.project.findUniqueOrThrow({
-      where: { id: createdProject.id },
+      where: { id: projectId },
       include: {
         tables: { include: { schemas: { orderBy: { version: "desc" }, take: 1 } } },
         references: true
