@@ -14,6 +14,12 @@ const envSchema = z.object({
   GEMINI_API_KEY_ENCRYPTION_KEY: z.string().min(16),
   GEMINI_MODEL: z.string().default("gemini-2.5-flash"),
   GEMINI_API_BASE: z.string().url().default("https://generativelanguage.googleapis.com/v1beta/models"),
+  OAUTH_CALLBACK_BASE_URL: z.string().url().default("http://localhost:8080"),
+  OAUTH_SUCCESS_REDIRECT: z.string().url().default("http://localhost:5173"),
+  GOOGLE_CLIENT_ID: z.string().default(""),
+  GOOGLE_CLIENT_SECRET: z.string().default(""),
+  MICROSOFT_CLIENT_ID: z.string().default(""),
+  MICROSOFT_CLIENT_SECRET: z.string().default(""),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60_000),
   RATE_LIMIT_MAX: z.coerce.number().default(100)
 });

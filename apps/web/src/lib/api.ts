@@ -2,6 +2,7 @@ const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
 
 export type ApiError = { code?: string; message?: string };
 export type AuthResponse = { token: string };
+export type ForgotPasswordResponse = { message: string; resetUrl?: string };
 export type SchemaColumn = {
   name: string;
   type: string;
@@ -56,6 +57,10 @@ export function clearAuthToken() {
   localStorage.removeItem("schema_builder_token");
 }
 
+export function getOAuthUrl(provider: "google" | "microsoft") {
+  return `${API_URL}/api/auth/oauth/${provider}`;
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem("schema_builder_token");
   const response = await fetch(`${API_URL}${path}`, {
@@ -101,6 +106,20 @@ export function loginUser(email: string, password: string) {
   return apiFetch<AuthResponse>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password })
+  });
+}
+
+export function requestPasswordReset(email: string) {
+  return apiFetch<ForgotPasswordResponse>("/api/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email })
+  });
+}
+
+export function resetPassword(token: string, password: string) {
+  return apiFetch<AuthResponse>("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password })
   });
 }
 

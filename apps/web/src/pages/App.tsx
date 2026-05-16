@@ -5,11 +5,14 @@ import { SchemaWorkspace } from "../components/SchemaWorkspace";
 import { GenerateProjectModal } from "../components/GenerateProjectModal";
 import { GeminiKeyModal } from "../components/GeminiKeyModal";
 import { AuthPage } from "./AuthPage";
-import { ApiError, clearAuthToken, exportTableSql, generateTableSchema, getAuthToken, getProject, listProjects, Project } from "../lib/api";
+import { ResetPasswordPage } from "./ResetPasswordPage";
+import { ApiError, clearAuthToken, exportTableSql, generateTableSchema, getAuthToken, getProject, listProjects, Project, setAuthToken } from "../lib/api";
 
 export function App() {
   const [quotaExhausted, setQuotaExhausted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAuthToken()));
+  const [authError, setAuthError] = useState("");
+  const [resetToken, setResetToken] = useState(() => new URLSearchParams(window.location.search).get("reset_token") ?? "");
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -51,8 +54,47 @@ export function App() {
     }
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const error = params.get("auth_error");
+    const nextResetToken = params.get("reset_token");
+    if (!token && !error && !nextResetToken) return;
+
+    if (nextResetToken) {
+      setResetToken(nextResetToken);
+      return;
+    }
+
+    if (token) {
+      setAuthToken(token);
+      setIsAuthenticated(true);
+      setAuthError("");
+    }
+    if (error) setAuthError(error);
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }, []);
+
+  if (resetToken && !isAuthenticated) {
+    return (
+      <ResetPasswordPage
+        token={resetToken}
+        onAuthenticated={() => {
+          setResetToken("");
+          window.history.replaceState({}, document.title, window.location.pathname);
+          setIsAuthenticated(true);
+        }}
+        onBackToLogin={() => {
+          setResetToken("");
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }}
+      />
+    );
+  }
+
   if (!isAuthenticated) {
-    return <AuthPage onAuthenticated={() => setIsAuthenticated(true)} />;
+    return <AuthPage authError={authError} onAuthenticated={() => setIsAuthenticated(true)} />;
   }
 
   return (
