@@ -57,7 +57,7 @@ router.post("/generate", async (req, res) => {
       rdbmsType: parsed.data.rdbmsType
     });
 
-    const created = await prisma.$transaction(async (tx) => {
+    const createdProject = await prisma.$transaction(async (tx) => {
       const project = await tx.project.create({
         data: {
           userId: req.user!.sub,
@@ -103,13 +103,15 @@ router.post("/generate", async (req, res) => {
         });
       }
 
-      return tx.project.findUniqueOrThrow({
-        where: { id: project.id },
-        include: {
-          tables: { include: { schemas: { orderBy: { version: "desc" }, take: 1 } } },
-          references: true
-        }
-      });
+      return project;
+    });
+
+    const created = await prisma.project.findUniqueOrThrow({
+      where: { id: createdProject.id },
+      include: {
+        tables: { include: { schemas: { orderBy: { version: "desc" }, take: 1 } } },
+        references: true
+      }
     });
 
     return res.status(201).json(created);
