@@ -56,6 +56,10 @@ export function clearAuthToken() {
   localStorage.removeItem("schema_builder_token");
 }
 
+export function getOAuthUrl(provider: "google" | "microsoft") {
+  return `${API_URL}/api/auth/oauth/${provider}`;
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem("schema_builder_token");
   const response = await fetch(`${API_URL}${path}`, {
