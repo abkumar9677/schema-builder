@@ -5,12 +5,19 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { env } from "../config/env.js";
 import { prisma } from "../config/prisma.js";
-import { signAccessToken } from "../utils/tokens.js";
+import { signAccessToken, signPasswordResetToken, verifyPasswordResetToken } from "../utils/tokens.js";
 
 const router = Router();
 const oauthProviderSchema = z.enum(["google", "microsoft"]);
 const credentialsSchema = z.object({
   email: z.string().email(),
+  password: z.string().min(8)
+});
+const forgotPasswordSchema = z.object({
+  email: z.string().email()
+});
+const resetPasswordSchema = z.object({
+  token: z.string().min(1),
   password: z.string().min(8)
 });
 
@@ -64,6 +71,12 @@ function redirectWithOAuthError(message: string) {
   return redirectUrl.toString();
 }
 
+function passwordResetUrl(token: string) {
+  const resetUrl = new URL(env.OAUTH_SUCCESS_REDIRECT);
+  resetUrl.searchParams.set("reset_token", token);
+  return resetUrl.toString();
+}
+
 function getEnabledOAuthConfig(provider: OAuthProvider) {
   const config = oauthConfig[provider];
   if (!config.clientId() || !config.clientSecret()) return undefined;
@@ -86,6 +99,37 @@ router.post("/login", async (req, res) => {
     return res.status(401).json({ code: "INVALID_CREDENTIALS", message: "Email or password is incorrect" });
   }
   return res.json({ token: signAccessToken({ sub: user.id, email: user.email }) });
+});
+
+router.post("/forgot-password", async (req, res) => {
+  const parsed = forgotPasswordSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ code: "VALIDATION_ERROR", issues: parsed.error.issues });
+
+  const user = await prisma.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
+  const response: { message: string; resetUrl?: string } = {
+    message: "If an account exists for this email, a password reset link will be available."
+  };
+
+  if (user) {
+    const token = signPasswordResetToken({ sub: user.id, email: user.email });
+    if (env.NODE_ENV !== "production") response.resetUrl = passwordResetUrl(token);
+  }
+
+  return res.json(response);
+});
+
+router.post("/reset-password", async (req, res) => {
+  const parsed = resetPasswordSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ code: "VALIDATION_ERROR", issues: parsed.error.issues });
+
+  try {
+    const payload = verifyPasswordResetToken(parsed.data.token);
+    const passwordHash = await bcrypt.hash(parsed.data.password, 12);
+    await prisma.user.update({ where: { id: payload.sub }, data: { passwordHash } });
+    return res.json({ token: signAccessToken({ sub: payload.sub, email: payload.email }) });
+  } catch {
+    return res.status(400).json({ code: "INVALID_RESET_TOKEN", message: "Password reset link is invalid or expired" });
+  }
 });
 
 router.get("/oauth/:provider", (req, res) => {
