@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: ai-schema-builder-api
+    runtime: node
+    rootDir: .
+    plan: free
+    buildCommand: npm install && npm run prisma:generate && npm run build --workspace apps/api
+    startCommand: npm run start --workspace apps/api
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY_ENCRYPTION_KEY
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+  - type: web
+    name: ai-schema-builder-web
+    runtime: static
+    rootDir: apps/web
+    buildCommand: npm install && npm run build --workspace apps/web
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false

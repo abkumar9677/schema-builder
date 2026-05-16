@@ -1,0 +1,225 @@
+AI Schema Builder
+Project Plan & Product Roadmap
+Version 1.0  |  2025
+1. Project Summary
+Attribute
+Detail
+Project Name
+AI Schema Builder
+Project Owner
+Engineering Lead
+Start Date
+Week 1 (Sprint 0)
+Target MVP Release
+Week 6
+Full Release (v1.0)
+Week 12
+Team Size
+3–4 engineers
+Tech Stack
+React, Node.js, PostgreSQL, Google Gemini Claude API
+2. Sprint Plan
+Phase 1 — Foundation (Weeks 1–4)
+Sprint
+Week
+Feature
+Owner
+Story Points
+Sprint 1
+Wk 1–2
+Project setup, Auth (register/login/JWT)
+Backend
+13
+Sprint 1
+Wk 1–2
+Database schema + migrations
+Backend
+8
+Sprint 1
+Wk 1–2
+React app scaffold + routing
+Frontend
+8
+Sprint 2
+Wk 3–4
+Project CRUD (create, list, update, delete)
+Backend
+13
+Sprint 2
+Wk 3–4
+Table management (add, edit, delete tables)
+Full Stack
+13
+Sprint 2
+Wk 3–4
+API Key management (encrypted storage)
+Backend
+8
+Sprint 2
+Wk 3–4
+Project & Table UI components
+Frontend
+13
+Phase 2 — AI Core (Weeks 5–8)
+Sprint
+Week
+Feature
+Owner
+Story Points
+Sprint 3
+Wk 5–6
+Gemini API integration + prompt engineering (Free)
+Backend
+21
+Sprint 3
+Wk 5–6
+Schema generation endpoint
+Backend
+13
+Sprint 3
+Wk 5–6
+Schema editor grid UI
+Frontend
+13
+Sprint 3
+Wk 5–6
+Error handling + retry logic
+Backend
+8
+Sprint 4
+Wk 7–8
+FK reference detection via Claude
+Backend
+13
+Sprint 4
+Wk 7–8
+Reference accept/reject UI
+Frontend
+8
+Sprint 4
+Wk 7–8
+Interactive ERD visualization (React Flow)
+Frontend
+21
+Sprint 4
+Wk 7–8
+Schema versioning
+Backend
+8
+Phase 3 — Polish & Launch (Weeks 9–12)
+Sprint
+Week
+Feature
+Owner
+Story Points
+Sprint 5
+Wk 9–10
+SQL DDL export (PostgreSQL/MySQL/SQLite)
+Backend
+13
+Sprint 5
+Wk 9–10
+JSON schema export
+Backend
+5
+Sprint 5
+Wk 9–10
+ERD PNG/SVG export
+Frontend
+8
+Sprint 5
+Wk 9–10
+End-to-end testing
+QA
+13
+Sprint 6
+Wk 11–12
+Team/multi-user project sharing
+Full Stack
+21
+Sprint 6
+Wk 11–12
+Performance optimization + caching
+Backend
+8
+Sprint 6
+Wk 11–12
+Production deployment (AWS)
+DevOps
+13
+Sprint 6
+Wk 11–12
+Documentation & user guide
+Team
+8
+3. Team & Roles
+Role
+Responsibilities
+Count
+Backend Engineer
+API design, Claude integration, DB schema, auth, exports
+1–2
+Frontend Engineer
+React UI, ERD visualization, schema editor, export UX
+1
+DevOps / Infra
+Docker, CI/CD, AWS deployment, monitoring
+0.5 (shared)
+QA Engineer
+E2E testing, performance testing, regression suite
+0.5 (shared)
+Product Owner
+Requirements, backlog grooming, stakeholder updates
+0.5 (shared)
+4. Risks & Mitigations
+Risk
+Probability
+Impact
+Mitigation
+Gemini API latency > 5s for complex schemas
+Medium
+High
+Async generation with polling; show progress indicator
+Gemini free tier rate limits hit (250 req/day, 10 RPM)
+Low
+Medium
+Implement exponential backoff; test with lower volume
+ERD becomes unreadable for 50+ tables
+Medium
+Medium
+Auto-layout + filter/search for large projects
+Schema JSON parse failures from Gemini
+Low
+High
+Strict prompt + JSON validation + retry logic
+Scope creep on team features
+High
+Medium
+Lock Phase 3 scope before Sprint 5; defer extras to v1.1
+5. Definition of Done
+All acceptance criteria for the story are met
+Unit tests written with > 80% coverage on new code
+Code reviewed and approved by at least one other engineer
+Deployed to staging and smoke-tested
+No open P0 or P1 bugs related to the story
+API documentation updated if new endpoints were added
+6. Success Metrics
+Metric
+Target
+Measurement Method
+Schema generation success rate
+> 95%
+API response logging
+Average generation time
+< 8 seconds
+P95 latency monitoring
+User task completion (schema to export)
+< 5 minutes
+Session analytics
+Weekly active users (Month 1)
+> 50
+User analytics
+ERD accuracy (FK suggestions accepted)
+> 70%
+User acceptance rate in DB
+End of Project Plan

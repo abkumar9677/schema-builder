@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  projects     Project[]
+  apiKey       ApiKey?
+}
+
+model Project {
+  id        String        @id @default(uuid())
+  userId    String
+  name      String
+  description String?
+  rdbmsType String        @default("postgresql")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tables    ProjectTable[]
+  references TableReference[]
+}
+
+model ProjectTable {
+  id          String    @id @default(uuid())
+  projectId   String
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  schemas     SchemaVersion[]
+}
+
+model SchemaVersion {
+  id          String       @id @default(uuid())
+  tableId     String
+  version     Int
+  columnsJson Json
+  indexesJson Json         @default("[]")
+  createdAt   DateTime     @default(now())
+  table       ProjectTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@unique([tableId, version])
+}
+
+model TableReference {
+  id          String   @id @default(uuid())
+  projectId   String
+  fromTableId String
+  fromCol     String
+  toTableId   String
+  toCol       String
+  accepted    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ApiKey {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  encryptedKey String
+  iv           String
+  authTag      String
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

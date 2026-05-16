@@ -1,0 +1,119 @@
+--- slide1 ---
+AI Schema Builder
+Intelligent Database Schema Generation for Backend Engineers
+Powered by Google Gemini API (Free Tier)
+Version 1.0 | 2025
+
+--- slide2 ---
+The Problem
+⏳  Time-Consuming
+Manually designing schemas for every table is slow and error-prone
+🔗  Missed Relations
+Foreign key relationships are often overlooked during early design
+📄  Poor Documentation
+Schema docs are rarely kept in sync with actual database structure
+🔄  Rework Cycles
+Schema changes mid-project cause expensive refactoring cascades
+
+--- slide3 ---
+Our Solution
+AI Schema Builder combines your domain knowledge with Gemini AI to generate production-ready database schemas in seconds — not hours.
+1
+Define Project
+& Tables
+2
+Claude Generates
+Schemas
+3
+Review
+& Edit
+4
+Auto-Detect
+FK References
+5
+Export
+SQL / JSON
+
+--- slide4 ---
+Key Features
+🤖  AI-Powered Generation
+Claude generates columns, types, constraints, and indexes based on your table description
+🗺️  Interactive ERD
+Live entity-relationship diagram updates as you add tables and accept FK relationships
+🔍  Smart Reference Detection
+Automatically suggests foreign key links across all tables in your project
+📤  Multi-Format Export
+Export as SQL DDL, JSON schema, or Markdown documentation for your team
+🔐  Secure API Key Mgmt
+Encrypted storage of your Anthropic API keys — never shared, never logged
+📜  Schema Versioning
+Every regeneration creates a snapshot — roll back or compare versions anytime
+
+--- slide5 ---
+Technical Architecture
+Frontend
+React + TypeScript + TailwindCSS + React Flow
+Backend API
+Node.js + Express + REST API
+AI Layer (Free)
+Google Gemini API (gemini-2.5-flash)
+Database
+PostgreSQL — Projects, Tables, Schemas, Versions
+Infrastructure
+Docker + Kubernetes | AWS ECS / GCP Cloud Run
+
+--- slide6 ---
+Google Gemini AI Integration
+System Prompt Context
+• Project Name & RDBMS type
+• All existing table names
+• Table descriptions
+• Desired column types
+• Relationship hints
+• Response format: JSON
+→
+Gemini Returns
+{ "columns": [
+  { "name": "id",
+    "type": "UUID",
+    "primaryKey": true },
+  { "name": "email",
+    "type": "VARCHAR(255)" }
+], "indexes": [...] }
+
+--- slide7 ---
+Deployment Strategy
+Development
+Docker Compose — local dev with hot-reload, local Postgres
+Staging
+AWS ECS / GCP Cloud Run — mirrors production, CI/CD validated
+Production
+Kubernetes (EKS/GKE) — autoscaling, managed DB, CDN-fronted
+CI/CD Pipeline: GitHub Actions → Docker Build → Registry Push → ECS/K8s Deploy → Health Check
+
+--- slide8 ---
+Product Roadmap
+Phase 1 — MVP
+Weeks 1–4
+✓  Auth + Projects
+✓  Table CRUD
+✓  Claude Schema Gen
+✓  SQL Export
+Phase 2 — Relations
+Weeks 5–8
+✓  FK Detection
+✓  ERD Visualization
+✓  Schema Versioning
+✓  JSON Export
+Phase 3 — Teams
+Weeks 9–12
+✓  Multi-user Projects
+✓  Role-based Access
+✓  Team API Keys
+✓  Activity Logs
+
+--- slide9 ---
+Let's Build Smarter.
+AI Schema Builder — reducing schema design time by 80%
+github.com/your-org/ai-schema-builder
+Questions?
