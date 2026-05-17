@@ -27,6 +27,7 @@ jobs:
       PORT: 8080
       CORS_ORIGIN: ${{ vars.CORS_ORIGIN || 'http://localhost:5173' }}
       DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/schemabuilder' }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL || secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/schemabuilder' }}
       JWT_SECRET: ${{ secrets.JWT_SECRET || 'test-secret-value-at-least-32-characters' }}
       JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET || 'test-refresh-secret-at-least-32-characters' }}
       GEMINI_API_KEY_ENCRYPTION_KEY: ${{ secrets.GEMINI_API_KEY_ENCRYPTION_KEY || 'test-encryption-key-at-least-32-chars' }}
@@ -40,7 +41,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
+      - run: npm ci --include=dev
       - run: npm run prisma:generate
       - run: npm run typecheck
       - run: npm test
