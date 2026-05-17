@@ -23,7 +23,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      NODE_ENV: test
+      NODE_ENV: production
       PORT: 8080
       CORS_ORIGIN: ${{ vars.CORS_ORIGIN || 'http://localhost:5173' }}
       DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/schemabuilder' }}
